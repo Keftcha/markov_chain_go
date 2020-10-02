@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func equals(slc1 []string, slc2 []string) bool {
+func equalSlices(slc1 []string, slc2 []string) bool {
 	if len(slc1) != len(slc2) {
 		return false
 	}
@@ -23,7 +23,7 @@ func TestSplitAnEmptyText(t *testing.T) {
 
 	expectedSplitedText := []string{"", "", "\x03"}
 
-	if !equals(expectedSplitedText, gotSplitedText) {
+	if !equalSlices(expectedSplitedText, gotSplitedText) {
 		t.Errorf(
 			"Expected: %q, but got: %q",
 			expectedSplitedText,
@@ -45,7 +45,7 @@ func TestSplitSomeText(t *testing.T) {
 		"previous", "event.", "\x03",
 	}
 
-	if !equals(expectedSplitedText, gotSplitedText) {
+	if !equalSlices(expectedSplitedText, gotSplitedText) {
 		t.Errorf(
 			"Expected: %q, but got: %q",
 			expectedSplitedText,
@@ -63,7 +63,7 @@ func TestSplitTextWithMultipleSpaces(t *testing.T) {
 		"simple", "", "", "text", "\x03",
 	}
 
-	if !equals(expectedSplitedText, gotSplitedText) {
+	if !equalSlices(expectedSplitedText, gotSplitedText) {
 		t.Errorf(
 			"Expected: %q, but got: %q",
 			expectedSplitedText,
@@ -83,7 +83,7 @@ func TestSplitTextThatHaveSpecialCaracters(t *testing.T) {
 		"¤", "ı", "🐺", "\x03",
 	}
 
-	if !equals(expectedSplitedText, gotSplitedText) {
+	if !equalSlices(expectedSplitedText, gotSplitedText) {
 		t.Errorf(
 			"Expected: %q, but got: %q",
 			expectedSplitedText,
