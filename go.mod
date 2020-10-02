@@ -1,3 +1,3 @@
-module github.com/keftcha/markov_chain_go
+module github.com/keftcha/markovchaingo
 
 go 1.15
