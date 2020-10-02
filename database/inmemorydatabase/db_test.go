@@ -95,7 +95,27 @@ func TestAddingMultipleEntryWithSameKey(t *testing.T) {
 
 	if !equalMap(expected, got) {
 		t.Errorf(
-			"Expected: %q, but got: %q",
+			"expected: %q, but got: %q",
+			expected,
+			got,
+		)
+	}
+}
+
+func TestAddingAnEntryWithTheElemAlreadyInTheKeySubset(t *testing.T) {
+	inMemDb := New()
+	inMemDb.Add([2]string{"1", "2"}, "¤")
+	inMemDb.Add([2]string{"1", "2"}, "¤")
+
+	expected := map[[2]string][]string{
+		[2]string{"1", "2"}: []string{"¤"},
+	}
+
+	got := inMemDb.data
+
+	if !equalMap(expected, got) {
+		t.Errorf(
+			"expected: %q, but got: %q",
 			expected,
 			got,
 		)

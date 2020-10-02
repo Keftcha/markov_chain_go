@@ -21,8 +21,10 @@ func (inMemDb *InMemoryDatabase) Add(key [2]string, elem string) {
 	// Get the list of words that correspont to the key
 	value := inMemDb.Get(key)
 	// Add the new word in the words list if he doesn't exist
-	value = append(value, elem)
-	inMemDb.Set(key, value)
+	if !contains(&value, elem) {
+		value = append(value, elem)
+		inMemDb.Set(key, value)
+	}
 }
 
 // Random entry from the key subset
