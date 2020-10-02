@@ -11,8 +11,10 @@ type MarkovChainGo struct {
 }
 
 // New return a pointer to a new instance of MarkovChainGo
-func New() *MarkovChainGo {
-	return &MarkovChainGo{}
+func New(connectionString string) *MarkovChainGo {
+	mcg := new(MarkovChainGo)
+	mcg.db = database.Get(connectionString)
+	return mcg
 }
 
 // Learn will learn from the given text
