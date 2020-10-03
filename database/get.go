@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/keftcha/markovchaingo/database/inmemorydatabase"
 	"github.com/keftcha/markovchaingo/database/jsondatabase"
 	"strings"
 )
@@ -12,9 +13,11 @@ func Get(connectionString string) Base {
 
 	switch dbType {
 	case "file": // For a JSON (ex: file:///path/to/file.json)
-		return jsonDatabase.New(resource)
+		jsnDb := jsondatabase.New(resource)
+		return &jsnDb
 	case "in-memory": // For in memory database (ex: in-memory://_)
-		//inmemory.Create()
+		inMemDb := inmemorydatabase.New()
+		return &inMemDb
 	default:
 		panic("Database not supported")
 	}
