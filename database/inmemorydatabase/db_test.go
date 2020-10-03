@@ -24,7 +24,6 @@ func equalMap(m1, m2 map[[2]string][]string) bool {
 
 	for k := range m1 {
 		// Check if the key is in m2 and if value are the same
-
 		if _, ok := m2[k]; !ok || !equalSlices(m1[k], m2[k]) {
 			return false
 		}

@@ -47,9 +47,7 @@ func (inMemDb *InMemoryDatabase) Random(key [2]string) string {
 // Get the value from the key
 func (inMemDb *InMemoryDatabase) Get(key [2]string) []string {
 	// Check if the key exist
-
-	value, ok := inMemDb.data[key]
-	if ok {
+	if value, ok := inMemDb.data[key]; ok {
 		return value
 	}
 	return make([]string, 0)
