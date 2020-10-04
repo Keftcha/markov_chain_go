@@ -27,10 +27,11 @@ func (jsnDb *JSONDatabase) Add(key [2]string, elem string) {
 }
 
 func add(
-	data map[[2]string][]string,
-	key [2]string,
+	data map[string][]string,
+	keyArr [2]string,
 	elem string,
-) map[[2]string][]string {
+) map[string][]string {
+	key := stringifyKey(keyArr)
 	// Get the list of words that correspont to the key
 	if value, ok := data[key]; !ok {
 		// Create the key and his new value
@@ -69,9 +70,10 @@ func (jsnDb *JSONDatabase) Get(key [2]string) []string {
 }
 
 func get(
-	data map[[2]string][]string,
-	key [2]string,
+	data map[string][]string,
+	keyArr [2]string,
 ) []string {
+	key := stringifyKey(keyArr)
 	// Check if the key exist
 	if value, ok := data[key]; ok {
 		return value
@@ -87,10 +89,11 @@ func (jsnDb *JSONDatabase) Set(key [2]string, value []string) {
 }
 
 func set(
-	data map[[2]string][]string,
-	key [2]string,
+	data map[string][]string,
+	keyArr [2]string,
 	value []string,
-) map[[2]string][]string {
+) map[string][]string {
+	key := stringifyKey(keyArr)
 	data[key] = value
 	return data
 }
@@ -104,14 +107,14 @@ func contains(list *[]string, item string) bool {
 	return false
 }
 
-func read(path string) map[[2]string][]string {
+func read(path string) map[string][]string {
 	// Read file content
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var data map[[2]string][]string
+	var data map[string][]string
 
 	// Parse json content
 	err = json.Unmarshal(content, &data)
@@ -122,7 +125,7 @@ func read(path string) map[[2]string][]string {
 	return data
 }
 
-func write(path string, data map[[2]string][]string) {
+func write(path string, data map[string][]string) {
 	// Stringify data
 	content, err := json.Marshal(data)
 	if err != nil {
@@ -133,4 +136,13 @@ func write(path string, data map[[2]string][]string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func stringifyKey(keyArr [2]string) string {
+	k, err := json.Marshal(keyArr)
+	key := string(k)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return key
 }

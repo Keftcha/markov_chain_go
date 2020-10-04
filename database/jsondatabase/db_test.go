@@ -17,7 +17,7 @@ func equalSlices(slc1 []string, slc2 []string) bool {
 	return true
 }
 
-func equalMap(m1, m2 map[[2]string][]string) bool {
+func equalMap(m1, m2 map[string][]string) bool {
 	if len(m1) != len(m2) {
 		return false
 	}
@@ -32,11 +32,11 @@ func equalMap(m1, m2 map[[2]string][]string) bool {
 }
 
 func TestAddingAnEntry(t *testing.T) {
-	data := make(map[[2]string][]string)
+	data := make(map[string][]string)
 	got := add(data, [2]string{"a", "b"}, "c")
 
-	expected := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c"},
+	expected := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c"},
 	}
 
 	if !equalMap(expected, got) {
@@ -49,13 +49,13 @@ func TestAddingAnEntry(t *testing.T) {
 }
 
 func TestAddingMultipleEntry(t *testing.T) {
-	data := make(map[[2]string][]string)
+	data := make(map[string][]string)
 	data = add(data, [2]string{"a", "b"}, "c")
 	got := add(data, [2]string{"d", "e"}, "f")
 
-	expected := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c"},
-		[2]string{"d", "e"}: []string{"f"},
+	expected := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c"},
+		"[\"d\",\"e\"]": []string{"f"},
 	}
 
 	if !equalMap(expected, got) {
@@ -68,12 +68,12 @@ func TestAddingMultipleEntry(t *testing.T) {
 }
 
 func TestAddingMultipleEntryWithSameKey(t *testing.T) {
-	data := make(map[[2]string][]string)
+	data := make(map[string][]string)
 	data = add(data, [2]string{"a", "b"}, "c")
 	got := add(data, [2]string{"a", "b"}, "f")
 
-	expected := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c", "f"},
+	expected := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c", "f"},
 	}
 
 	if !equalMap(expected, got) {
@@ -86,12 +86,12 @@ func TestAddingMultipleEntryWithSameKey(t *testing.T) {
 }
 
 func TestAddingAnEntryWithTheElemAlreadyInTheKeySubset(t *testing.T) {
-	data := make(map[[2]string][]string)
+	data := make(map[string][]string)
 	data = add(data, [2]string{"1", "2"}, "¤")
 	got := add(data, [2]string{"1", "2"}, "¤")
 
-	expected := map[[2]string][]string{
-		[2]string{"1", "2"}: []string{"¤"},
+	expected := map[string][]string{
+		"[\"1\",\"2\"]": []string{"¤"},
 	}
 
 	if !equalMap(expected, got) {
@@ -115,7 +115,7 @@ func TestGetRandomEntryFromSubset(t *testing.T) {
 }
 
 func TestGettingWhenThereIsNoData(t *testing.T) {
-	data := make(map[[2]string][]string)
+	data := make(map[string][]string)
 
 	expected := make([]string, 0)
 
@@ -131,8 +131,8 @@ func TestGettingWhenThereIsNoData(t *testing.T) {
 }
 
 func TestGettingWhenTheKeyIsntPresent(t *testing.T) {
-	data := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c"},
+	data := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c"},
 	}
 
 	expected := make([]string, 0)
@@ -149,8 +149,8 @@ func TestGettingWhenTheKeyIsntPresent(t *testing.T) {
 }
 
 func TestGetting(t *testing.T) {
-	data := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c"},
+	data := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c"},
 	}
 
 	expected := []string{"c"}
@@ -167,11 +167,11 @@ func TestGetting(t *testing.T) {
 }
 
 func TestSettingWhenTheDataIsEmpty(t *testing.T) {
-	data := make(map[[2]string][]string)
+	data := make(map[string][]string)
 	got := set(data, [2]string{"a", "b"}, []string{"c", "d", "e"})
 
-	expected := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c", "d", "e"},
+	expected := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c", "d", "e"},
 	}
 
 	if !equalMap(expected, got) {
@@ -184,14 +184,14 @@ func TestSettingWhenTheDataIsEmpty(t *testing.T) {
 }
 
 func TestSettingOnAnAlreadyExistingKey(t *testing.T) {
-	data := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c", "d", "e"},
+	data := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c", "d", "e"},
 	}
 
 	got := set(data, [2]string{"a", "b"}, []string{"f", "g", "h"})
 
-	expected := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"f", "g", "h"},
+	expected := map[string][]string{
+		"[\"a\",\"b\"]": []string{"f", "g", "h"},
 	}
 
 	if !equalMap(expected, got) {
@@ -204,15 +204,15 @@ func TestSettingOnAnAlreadyExistingKey(t *testing.T) {
 }
 
 func TestSettingOnAnNonExistingKey(t *testing.T) {
-	data := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c", "d", "e"},
+	data := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c", "d", "e"},
 	}
 
 	got := set(data, [2]string{"f", "g"}, []string{"h", "i", "j"})
 
-	expected := map[[2]string][]string{
-		[2]string{"a", "b"}: []string{"c", "d", "e"},
-		[2]string{"f", "g"}: []string{"h", "i", "j"},
+	expected := map[string][]string{
+		"[\"a\",\"b\"]": []string{"c", "d", "e"},
+		"[\"f\",\"g\"]": []string{"h", "i", "j"},
 	}
 
 	if !equalMap(expected, got) {
