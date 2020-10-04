@@ -33,7 +33,14 @@ func equalMap(m1, m2 map[string][]string) bool {
 
 func TestAddingAnEntry(t *testing.T) {
 	data := make(map[string][]string)
-	got := add(data, [2]string{"a", "b"}, "c")
+	got, err := add(data, [2]string{"a", "b"}, "c")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[string][]string{
 		"[\"a\",\"b\"]": []string{"c"},
@@ -50,8 +57,15 @@ func TestAddingAnEntry(t *testing.T) {
 
 func TestAddingMultipleEntry(t *testing.T) {
 	data := make(map[string][]string)
-	data = add(data, [2]string{"a", "b"}, "c")
-	got := add(data, [2]string{"d", "e"}, "f")
+	data, _ = add(data, [2]string{"a", "b"}, "c")
+	got, err := add(data, [2]string{"d", "e"}, "f")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[string][]string{
 		"[\"a\",\"b\"]": []string{"c"},
@@ -69,8 +83,15 @@ func TestAddingMultipleEntry(t *testing.T) {
 
 func TestAddingMultipleEntryWithSameKey(t *testing.T) {
 	data := make(map[string][]string)
-	data = add(data, [2]string{"a", "b"}, "c")
-	got := add(data, [2]string{"a", "b"}, "f")
+	data, _ = add(data, [2]string{"a", "b"}, "c")
+	got, err := add(data, [2]string{"a", "b"}, "f")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[string][]string{
 		"[\"a\",\"b\"]": []string{"c", "f"},
@@ -87,8 +108,15 @@ func TestAddingMultipleEntryWithSameKey(t *testing.T) {
 
 func TestAddingAnEntryWithTheElemAlreadyInTheKeySubset(t *testing.T) {
 	data := make(map[string][]string)
-	data = add(data, [2]string{"1", "2"}, "¤")
-	got := add(data, [2]string{"1", "2"}, "¤")
+	data, _ = add(data, [2]string{"1", "2"}, "¤")
+	got, err := add(data, [2]string{"1", "2"}, "¤")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[string][]string{
 		"[\"1\",\"2\"]": []string{"¤"},
@@ -104,7 +132,14 @@ func TestAddingAnEntryWithTheElemAlreadyInTheKeySubset(t *testing.T) {
 }
 
 func TestGetRandomEntryFromSubset(t *testing.T) {
-	got := random([]string{"¤", "§"})
+	got, err := random([]string{"¤", "§"})
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	if got != "¤" && got != "§" {
 		t.Errorf(
@@ -114,18 +149,28 @@ func TestGetRandomEntryFromSubset(t *testing.T) {
 	}
 }
 
+func TestGetRandomEntryFromEmptySubset(t *testing.T) {
+	got, err := random(make([]string, 0))
+
+	if err.Error() != "The key haven't any words in his subset" || got != "" {
+		t.Errorf(
+			"Error got is %q, instead of %q",
+			err.Error(),
+			"The key haven't any words in his subset",
+		)
+	}
+}
+
 func TestGettingWhenThereIsNoData(t *testing.T) {
 	data := make(map[string][]string)
 
-	expected := make([]string, 0)
+	got, err := get(data, [2]string{"", ""})
 
-	got := get(data, [2]string{"", ""})
-
-	if !equalSlices(expected, got) {
+	if err.Error() != "Key not found" || got != nil {
 		t.Errorf(
-			"Expected: %q, but got: %q",
-			expected,
-			got,
+			"Error got is %q, instead of %q",
+			err.Error(),
+			"Key not found",
 		)
 	}
 }
@@ -135,15 +180,13 @@ func TestGettingWhenTheKeyIsntPresent(t *testing.T) {
 		"[\"a\",\"b\"]": []string{"c"},
 	}
 
-	expected := make([]string, 0)
+	got, err := get(data, [2]string{"", ""})
 
-	got := get(data, [2]string{"", ""})
-
-	if !equalSlices(expected, got) {
+	if err.Error() != "Key not found" || got != nil {
 		t.Errorf(
-			"Expected: %q, but got: %q",
-			expected,
-			got,
+			"Error got is %q, instead of %q",
+			err.Error(),
+			"Key not found",
 		)
 	}
 }
@@ -155,7 +198,14 @@ func TestGetting(t *testing.T) {
 
 	expected := []string{"c"}
 
-	got := get(data, [2]string{"a", "b"})
+	got, err := get(data, [2]string{"a", "b"})
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	if !equalSlices(expected, got) {
 		t.Errorf(
@@ -168,7 +218,14 @@ func TestGetting(t *testing.T) {
 
 func TestSettingWhenTheDataIsEmpty(t *testing.T) {
 	data := make(map[string][]string)
-	got := set(data, [2]string{"a", "b"}, []string{"c", "d", "e"})
+	got, err := set(data, [2]string{"a", "b"}, []string{"c", "d", "e"})
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[string][]string{
 		"[\"a\",\"b\"]": []string{"c", "d", "e"},
@@ -188,7 +245,14 @@ func TestSettingOnAnAlreadyExistingKey(t *testing.T) {
 		"[\"a\",\"b\"]": []string{"c", "d", "e"},
 	}
 
-	got := set(data, [2]string{"a", "b"}, []string{"f", "g", "h"})
+	got, err := set(data, [2]string{"a", "b"}, []string{"f", "g", "h"})
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[string][]string{
 		"[\"a\",\"b\"]": []string{"f", "g", "h"},
@@ -208,7 +272,14 @@ func TestSettingOnAnNonExistingKey(t *testing.T) {
 		"[\"a\",\"b\"]": []string{"c", "d", "e"},
 	}
 
-	got := set(data, [2]string{"f", "g"}, []string{"h", "i", "j"})
+	got, err := set(data, [2]string{"f", "g"}, []string{"h", "i", "j"})
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[string][]string{
 		"[\"a\",\"b\"]": []string{"c", "d", "e"},

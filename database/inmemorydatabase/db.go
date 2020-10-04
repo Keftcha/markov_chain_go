@@ -1,6 +1,7 @@
 package inmemorydatabase
 
 import (
+	"errors"
 	"math/rand"
 )
 
@@ -17,45 +18,52 @@ func New() InMemoryDatabase {
 }
 
 // Add an entry to the database
-func (inMemDb *InMemoryDatabase) Add(key [2]string, elem string) {
+func (inMemDb *InMemoryDatabase) Add(key [2]string, elem string) error {
 	// Get the list of words that correspont to the key
-	value := inMemDb.Get(key)
+	value, _ := inMemDb.Get(key)
 	// Add the new word in the words list if he doesn't exist
 	if !contains(&value, elem) {
 		value = append(value, elem)
 		inMemDb.Set(key, value)
 	}
+
+	return nil
 }
 
 // Random entry from the key subset
-func (inMemDb *InMemoryDatabase) Random(key [2]string) string {
+func (inMemDb *InMemoryDatabase) Random(key [2]string) (string, error) {
 	// Get the list of words that correspont to the key
-	value := inMemDb.Get(key)
+	value, err := inMemDb.Get(key)
+	if err != nil {
+		return "", err
+	}
 	nbWords := len(value)
 
 	// There is no key, or the key haven't any subset
 	if nbWords == 0 {
-		return ""
+		return "", errors.New("The key haven't any words in his subset")
 	}
 
 	// Choose a ramdom number (idx of the word)
 	idx := rand.Intn(nbWords)
 
-	return value[idx]
+	return value[idx], nil
 }
 
 // Get the value from the key
-func (inMemDb *InMemoryDatabase) Get(key [2]string) []string {
+func (inMemDb *InMemoryDatabase) Get(key [2]string) ([]string, error) {
 	// Check if the key exist
 	if value, ok := inMemDb.data[key]; ok {
-		return value
+		return value, nil
 	}
-	return make([]string, 0)
+	return nil, errors.New("Key not found")
+
 }
 
 // Set the value to the key
-func (inMemDb *InMemoryDatabase) Set(key [2]string, value []string) {
+func (inMemDb *InMemoryDatabase) Set(key [2]string, value []string) error {
 	inMemDb.data[key] = value
+	return nil
 }
 
 func contains(list *[]string, item string) bool {

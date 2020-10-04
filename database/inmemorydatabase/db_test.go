@@ -46,7 +46,14 @@ func TestNewFunctionReturnAnMemoryDatabaseEmpty(t *testing.T) {
 
 func TestAddingAnEntry(t *testing.T) {
 	inMemDb := New()
-	inMemDb.Add([2]string{"a", "b"}, "c")
+	err := inMemDb.Add([2]string{"a", "b"}, "c")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := make(map[[2]string][]string)
 	expected[[2]string{"a", "b"}] = []string{"c"}
@@ -65,7 +72,14 @@ func TestAddingAnEntry(t *testing.T) {
 func TestAddingMultipleEntry(t *testing.T) {
 	inMemDb := New()
 	inMemDb.Add([2]string{"a", "b"}, "c")
-	inMemDb.Add([2]string{"d", "e"}, "f")
+	err := inMemDb.Add([2]string{"d", "e"}, "f")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := make(map[[2]string][]string)
 	expected[[2]string{"a", "b"}] = []string{"c"}
@@ -85,7 +99,14 @@ func TestAddingMultipleEntry(t *testing.T) {
 func TestAddingMultipleEntryWithSameKey(t *testing.T) {
 	inMemDb := New()
 	inMemDb.Add([2]string{"a", "b"}, "c")
-	inMemDb.Add([2]string{"a", "b"}, "f")
+	err := inMemDb.Add([2]string{"a", "b"}, "f")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := make(map[[2]string][]string)
 	expected[[2]string{"a", "b"}] = []string{"c", "f"}
@@ -104,7 +125,14 @@ func TestAddingMultipleEntryWithSameKey(t *testing.T) {
 func TestAddingAnEntryWithTheElemAlreadyInTheKeySubset(t *testing.T) {
 	inMemDb := New()
 	inMemDb.Add([2]string{"1", "2"}, "¤")
-	inMemDb.Add([2]string{"1", "2"}, "¤")
+	err := inMemDb.Add([2]string{"1", "2"}, "¤")
+
+	if err != nil {
+		t.Errorf(
+			"Got an error: %q",
+			err,
+		)
+	}
 
 	expected := map[[2]string][]string{
 		[2]string{"1", "2"}: []string{"¤"},
@@ -126,7 +154,14 @@ func TestGetRandomEntryFromSubset(t *testing.T) {
 	inMemDb.Add([2]string{"1", "2"}, "¤")
 	inMemDb.Add([2]string{"1", "2"}, "§")
 
-	got := inMemDb.Random([2]string{"1", "2"})
+	got, err := inMemDb.Random([2]string{"1", "2"})
+
+	if err != nil {
+		t.Errorf(
+			"An error occured: %s",
+			err,
+		)
+	}
 
 	if got != "¤" && got != "§" {
 		t.Errorf(
@@ -136,18 +171,47 @@ func TestGetRandomEntryFromSubset(t *testing.T) {
 	}
 }
 
+func TestGetRandomEntryFromEmptySubset(t *testing.T) {
+	inMemDb := New()
+	inMemDb.data = map[[2]string][]string{
+		[2]string{"1", "2"}: make([]string, 0),
+	}
+
+	got, err := inMemDb.Random([2]string{"1", "2"})
+
+	if err.Error() != "The key haven't any words in his subset" || got != "" {
+		t.Errorf(
+			"Error got is %q, instead of %q",
+			err.Error(),
+			"The key haven't any words in his subset",
+		)
+	}
+}
+
+func TestGetRandomEntryFromSubsetOfMissingKey(t *testing.T) {
+	inMemDb := New()
+
+	got, err := inMemDb.Random([2]string{"1", "2"})
+
+	if err.Error() != "Key not found" || got != "" {
+		t.Errorf(
+			"Error got is %q, instead of %q",
+			err.Error(),
+			"Key not found",
+		)
+	}
+}
+
 func TestGettingWhenThereIsNoData(t *testing.T) {
 	inMemDb := New()
 
-	expected := make([]string, 0)
+	got, err := inMemDb.Get([2]string{"", ""})
 
-	got := inMemDb.Get([2]string{"", ""})
-
-	if !equalSlices(expected, got) {
+	if err.Error() != "Key not found" || got != nil {
 		t.Errorf(
-			"Expected: %q, but got: %q",
-			expected,
-			got,
+			"Error got is %q, instead of %q",
+			err.Error(),
+			"Key not found",
 		)
 	}
 }
@@ -156,15 +220,13 @@ func TestGettingWhenTheKeyIsntPresent(t *testing.T) {
 	inMemDb := New()
 	inMemDb.Add([2]string{"a", "b"}, "c")
 
-	expected := make([]string, 0)
+	got, err := inMemDb.Get([2]string{"", ""})
 
-	got := inMemDb.Get([2]string{"", ""})
-
-	if !equalSlices(expected, got) {
+	if err.Error() != "Key not found" || got != nil {
 		t.Errorf(
-			"Expected: %q, but got: %q",
-			expected,
-			got,
+			"Error got is %q, instead of %q",
+			err.Error(),
+			"Key not found",
 		)
 	}
 }
@@ -175,7 +237,14 @@ func TestGetting(t *testing.T) {
 
 	expected := []string{"c"}
 
-	got := inMemDb.Get([2]string{"a", "b"})
+	got, err := inMemDb.Get([2]string{"a", "b"})
+
+	if err != nil {
+		t.Errorf(
+			"An error occured: %s",
+			err,
+		)
+	}
 
 	if !equalSlices(expected, got) {
 		t.Errorf(
@@ -188,7 +257,15 @@ func TestGetting(t *testing.T) {
 
 func TestSettingWhenTheDataIsEmpty(t *testing.T) {
 	inMemDb := New()
-	inMemDb.Set([2]string{"a", "b"}, []string{"c", "d", "e"})
+	err := inMemDb.Set([2]string{"a", "b"}, []string{"c", "d", "e"})
+
+	if err != nil {
+		t.Errorf(
+			"An error occured: %s",
+			err,
+		)
+	}
+
 	got := inMemDb.data
 
 	expected := map[[2]string][]string{
@@ -207,7 +284,15 @@ func TestSettingWhenTheDataIsEmpty(t *testing.T) {
 func TestSettingOnAnAlreadyExistingKey(t *testing.T) {
 	inMemDb := New()
 	inMemDb.Set([2]string{"a", "b"}, []string{"c", "d", "e"})
-	inMemDb.Set([2]string{"a", "b"}, []string{"f", "g", "h"})
+	err := inMemDb.Set([2]string{"a", "b"}, []string{"f", "g", "h"})
+
+	if err != nil {
+		t.Errorf(
+			"An error occured: %s",
+			err,
+		)
+	}
+
 	got := inMemDb.data
 
 	expected := map[[2]string][]string{
@@ -226,7 +311,15 @@ func TestSettingOnAnAlreadyExistingKey(t *testing.T) {
 func TestSettingOnAnNonExistingKey(t *testing.T) {
 	inMemDb := New()
 	inMemDb.Set([2]string{"a", "b"}, []string{"c", "d", "e"})
-	inMemDb.Set([2]string{"f", "g"}, []string{"h", "i", "j"})
+	err := inMemDb.Set([2]string{"f", "g"}, []string{"h", "i", "j"})
+
+	if err != nil {
+		t.Errorf(
+			"An error occured: %s",
+			err,
+		)
+	}
+
 	got := inMemDb.data
 
 	expected := map[[2]string][]string{

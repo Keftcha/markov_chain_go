@@ -2,8 +2,8 @@ package jsondatabase
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
-	"log"
 	"math/rand"
 )
 
@@ -20,18 +20,35 @@ func New(path string) JSONDatabase {
 }
 
 // Add an entry to the database
-func (jsnDb *JSONDatabase) Add(key [2]string, elem string) {
-	data := read(jsnDb.filepath)
-	data = add(data, key, elem)
-	write(jsnDb.filepath, data)
+func (jsnDb *JSONDatabase) Add(key [2]string, elem string) error {
+	data, err := read(jsnDb.filepath)
+	if err != nil {
+		return err
+	}
+
+	data, err = add(data, key, elem)
+	if err != nil {
+		return err
+	}
+
+	err = write(jsnDb.filepath, data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func add(
 	data map[string][]string,
 	keyArr [2]string,
 	elem string,
-) map[string][]string {
-	key := stringifyKey(keyArr)
+) (map[string][]string, error) {
+	key, err := stringifyKey(keyArr)
+	if err != nil {
+		return nil, err
+	}
+
 	// Get the list of words that correspont to the key
 	if value, ok := data[key]; !ok {
 		// Create the key and his new value
@@ -41,61 +58,82 @@ func add(
 		value = append(value, elem)
 		data[key] = value
 	}
-	return data
+
+	return data, nil
 }
 
 // Random entry from the key subset
-func (jsnDb *JSONDatabase) Random(key [2]string) string {
-	words := jsnDb.Get(key)
+func (jsnDb *JSONDatabase) Random(key [2]string) (string, error) {
+	words, err := jsnDb.Get(key)
+	if err != nil {
+		return "", nil
+	}
 	return random(words)
 }
 
-func random(
-	words []string,
-) string {
+func random(words []string) (string, error) {
 	nbWords := len(words)
 	if nbWords <= 0 {
 		// The key doesn't have any subset value
-		return ""
+		return "", errors.New("The key haven't any words in his subset")
 	}
 	// Choose a random index
 	idx := rand.Intn(nbWords)
-	return words[idx]
+	return words[idx], nil
 }
 
 // Get the value from the key
-func (jsnDb *JSONDatabase) Get(key [2]string) []string {
-	data := read(jsnDb.filepath)
+func (jsnDb *JSONDatabase) Get(key [2]string) ([]string, error) {
+	data, err := read(jsnDb.filepath)
+	if err != nil {
+		return nil, err
+	}
 	return get(data, key)
 }
 
-func get(
-	data map[string][]string,
-	keyArr [2]string,
-) []string {
-	key := stringifyKey(keyArr)
+func get(data map[string][]string, keyArr [2]string) ([]string, error) {
+	key, err := stringifyKey(keyArr)
+	if err != nil {
+		return nil, err
+	}
 	// Check if the key exist
 	if value, ok := data[key]; ok {
-		return value
+		return value, nil
 	}
-	return make([]string, 0)
+	return nil, errors.New("Key not found")
 }
 
 // Set the value to the key
-func (jsnDb *JSONDatabase) Set(key [2]string, value []string) {
-	data := read(jsnDb.filepath)
-	data = set(data, key, value)
-	write(jsnDb.filepath, data)
+func (jsnDb *JSONDatabase) Set(key [2]string, value []string) error {
+	data, err := read(jsnDb.filepath)
+	if err != nil {
+		return err
+	}
+
+	data, err = set(data, key, value)
+	if err != nil {
+		return err
+	}
+
+	err = write(jsnDb.filepath, data)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func set(
 	data map[string][]string,
 	keyArr [2]string,
 	value []string,
-) map[string][]string {
-	key := stringifyKey(keyArr)
+) (map[string][]string, error) {
+	key, err := stringifyKey(keyArr)
+	if err != nil {
+		return nil, err
+	}
+
 	data[key] = value
-	return data
+	return data, nil
 }
 
 func contains(list *[]string, item string) bool {
@@ -107,11 +145,11 @@ func contains(list *[]string, item string) bool {
 	return false
 }
 
-func read(path string) map[string][]string {
+func read(path string) (map[string][]string, error) {
 	// Read file content
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	var data map[string][]string
@@ -119,30 +157,31 @@ func read(path string) map[string][]string {
 	// Parse json content
 	err = json.Unmarshal(content, &data)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return data
+	return data, nil
 }
 
-func write(path string, data map[string][]string) {
+func write(path string, data map[string][]string) error {
 	// Stringify data
 	content, err := json.Marshal(data)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = ioutil.WriteFile(path, content, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func stringifyKey(keyArr [2]string) string {
+func stringifyKey(keyArr [2]string) (string, error) {
 	k, err := json.Marshal(keyArr)
 	key := string(k)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	return key
+	return key, nil
 }
