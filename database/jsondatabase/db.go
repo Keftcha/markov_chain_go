@@ -66,7 +66,7 @@ func add(
 func (jsnDb *JSONDatabase) Random(key [2]string) (string, error) {
 	words, err := jsnDb.Get(key)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	return random(words)
 }
