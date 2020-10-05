@@ -18,9 +18,9 @@ func New(connectionString string) *MarkovChainGo {
 }
 
 // Learn will learn from the given text
-func (mcg *MarkovChainGo) Learn(text string) {
+func (mcg *MarkovChainGo) Learn(text string) error {
 	if text == "" {
-		return
+		return nil
 	}
 
 	words := splitMessage(text)
@@ -29,19 +29,26 @@ func (mcg *MarkovChainGo) Learn(text string) {
 		key := [2]string{words[idx-2], words[idx-1]}
 		value := words[idx]
 
-		mcg.db.Add(key, value)
+		err := mcg.db.Add(key, value)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // Talk return a random sentence
-func (mcg *MarkovChainGo) Talk() string {
+func (mcg *MarkovChainGo) Talk() (string, error) {
 	key := [2]string{"", ""}
 	// Our sentence
 	words := make([]string, 0)
 
 	for {
 		// Get a word to add to the sentence
-		word := mcg.db.Random(key)
+		word, err := mcg.db.Random(key)
+		if err != nil {
+			return "", err
+		}
 		// Check if we have finish the sentence
 		if word == "\x03" {
 			break
@@ -53,7 +60,7 @@ func (mcg *MarkovChainGo) Talk() string {
 		key[0], key[1] = key[1], word
 	}
 
-	return strings.Join(words, " ")
+	return strings.Join(words, " "), nil
 }
 
 func splitMessage(text string) []string {
