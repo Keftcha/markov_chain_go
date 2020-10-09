@@ -5,11 +5,13 @@ import (
 	"errors"
 	"io/ioutil"
 	"math/rand"
+	"sync"
 )
 
 // JSONDatabase struct implement Base interface
 type JSONDatabase struct {
 	filepath string
+	mux      sync.Mutex
 }
 
 // New json db that implement the Base interface
@@ -21,7 +23,7 @@ func New(path string) JSONDatabase {
 
 // Add an entry to the database
 func (jsnDb *JSONDatabase) Add(key [2]string, elem string) error {
-	data, err := read(jsnDb.filepath)
+	data, err := jsnDb.read()
 	if err != nil {
 		return err
 	}
@@ -31,7 +33,7 @@ func (jsnDb *JSONDatabase) Add(key [2]string, elem string) error {
 		return err
 	}
 
-	err = write(jsnDb.filepath, data)
+	err = jsnDb.write(data)
 	if err != nil {
 		return err
 	}
@@ -84,7 +86,7 @@ func random(words []string) (string, error) {
 
 // Get the value from the key
 func (jsnDb *JSONDatabase) Get(key [2]string) ([]string, error) {
-	data, err := read(jsnDb.filepath)
+	data, err := jsnDb.read()
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +107,8 @@ func get(data map[string][]string, keyArr [2]string) ([]string, error) {
 
 // Set the value to the key
 func (jsnDb *JSONDatabase) Set(key [2]string, value []string) error {
-	data, err := read(jsnDb.filepath)
+	data, err := jsnDb.read()
+
 	if err != nil {
 		return err
 	}
@@ -115,7 +118,7 @@ func (jsnDb *JSONDatabase) Set(key [2]string, value []string) error {
 		return err
 	}
 
-	err = write(jsnDb.filepath, data)
+	err = jsnDb.write(data)
 	if err != nil {
 		return err
 	}
@@ -145,9 +148,11 @@ func contains(list *[]string, item string) bool {
 	return false
 }
 
-func read(path string) (map[string][]string, error) {
+func (jsnDb *JSONDatabase) read() (map[string][]string, error) {
 	// Read file content
-	content, err := ioutil.ReadFile(path)
+	jsnDb.mux.Lock()
+	content, err := ioutil.ReadFile(jsnDb.filepath)
+	jsnDb.mux.Unlock()
 	if err != nil {
 		return nil, err
 	}
@@ -163,14 +168,16 @@ func read(path string) (map[string][]string, error) {
 	return data, nil
 }
 
-func write(path string, data map[string][]string) error {
+func (jsnDb *JSONDatabase) write(data map[string][]string) error {
 	// Stringify data
 	content, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(path, content, 0644)
+	jsnDb.mux.Lock()
+	err = ioutil.WriteFile(jsnDb.filepath, content, 0644)
+	jsnDb.mux.Unlock()
 	if err != nil {
 		return err
 	}
