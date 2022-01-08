@@ -9,7 +9,7 @@ import (
 // InMemoryDatabase struct implement Base interface
 type InMemoryDatabase struct {
 	data map[[2]string][]string
-	mux  sync.Mutex
+	mtx  sync.Mutex
 }
 
 // New in-memory db that implement the Base interface
@@ -55,8 +55,8 @@ func (inMemDb *InMemoryDatabase) Random(key [2]string) (string, error) {
 // Get the value from the key
 func (inMemDb *InMemoryDatabase) Get(key [2]string) ([]string, error) {
 	// Check if the key exist
-	inMemDb.mux.Lock()
-	defer inMemDb.mux.Unlock()
+	inMemDb.mtx.Lock()
+	defer inMemDb.mtx.Unlock()
 	if value, ok := inMemDb.data[key]; ok {
 		return value, nil
 	}
@@ -66,9 +66,9 @@ func (inMemDb *InMemoryDatabase) Get(key [2]string) ([]string, error) {
 
 // Set the value to the key
 func (inMemDb *InMemoryDatabase) Set(key [2]string, value []string) error {
-	inMemDb.mux.Lock()
+	inMemDb.mtx.Lock()
 	inMemDb.data[key] = value
-	inMemDb.mux.Unlock()
+	inMemDb.mtx.Unlock()
 	return nil
 }
 

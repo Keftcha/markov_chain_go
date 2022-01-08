@@ -11,7 +11,7 @@ import (
 // JSONDatabase struct implement Base interface
 type JSONDatabase struct {
 	filepath string
-	mux      sync.Mutex
+	mtx      sync.Mutex
 }
 
 // New json db that implement the Base interface
@@ -150,9 +150,9 @@ func contains(list *[]string, item string) bool {
 
 func (jsnDb *JSONDatabase) read() (map[string][]string, error) {
 	// Read file content
-	jsnDb.mux.Lock()
+	jsnDb.mtx.Lock()
 	content, err := ioutil.ReadFile(jsnDb.filepath)
-	jsnDb.mux.Unlock()
+	jsnDb.mtx.Unlock()
 	if err != nil {
 		return nil, err
 	}
@@ -175,9 +175,9 @@ func (jsnDb *JSONDatabase) write(data map[string][]string) error {
 		return err
 	}
 
-	jsnDb.mux.Lock()
+	jsnDb.mtx.Lock()
 	err = ioutil.WriteFile(jsnDb.filepath, content, 0644)
-	jsnDb.mux.Unlock()
+	jsnDb.mtx.Unlock()
 	if err != nil {
 		return err
 	}
